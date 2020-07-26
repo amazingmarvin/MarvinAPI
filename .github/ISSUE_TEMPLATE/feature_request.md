@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Request a Marvin API feature
 title: "[REQUEST]"
 labels: request
 assignees: amazingmarvin
