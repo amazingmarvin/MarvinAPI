@@ -8,3 +8,5 @@ See [`CHANGELOG.md`](https://github.com/amazingmarvin/MarvinAPI/blob/master/CHAN
 
 # API bugs and feature requests
 Create an [issue](https://github.com/amazingmarvin/MarvinAPI/issues).
+
+<img src="images/Lab.png" width="400" />
