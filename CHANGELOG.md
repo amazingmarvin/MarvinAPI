@@ -1,6 +1,7 @@
 # 2020-10-15
 * Documented Webhooks
 * Documented Timer formats
+* Documented conflicts and `fieldUpdates` in direct database access page
 
 # 2020-09-08
 * Added /api/addProject
