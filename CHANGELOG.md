@@ -1,3 +1,7 @@
+# 2020-10-15
+* Documented Webhooks
+* Documented Timer formats
+
 # 2020-09-08
 * Added /api/addProject
 * Added support for more task fields in /api/addTask: bonusSection, customSection, timeBlockSection, rewardPoints, rewardId, backburner, reviewDate, timeEstimate, itemSnoozeTime, permaSnoozeTime
