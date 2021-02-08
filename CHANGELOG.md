@@ -1,3 +1,10 @@
+# 2021-02-08
+* Documented /api/me
+* Documented habit webhooks
+
+# 2021-01-17
+* Documented /api/kudos
+
 # 2020-10-15
 * Documented Webhooks
 * Documented Timer formats
