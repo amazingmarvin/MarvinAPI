@@ -1,3 +1,6 @@
+# 2021-02-23
+* Documented Goals
+
 # 2021-02-08
 * Documented /api/me
 * Documented habit webhooks
