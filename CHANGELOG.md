@@ -1,3 +1,6 @@
+# 2021-02-24
+* Documented Habits
+
 # 2021-02-23
 * Documented Goals
 
