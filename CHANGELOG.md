@@ -1,3 +1,6 @@
+# 2021-02-25
+* Documented Calendars and Events
+
 # 2021-02-24
 * Documented Habits
 
