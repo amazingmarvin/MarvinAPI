@@ -11,6 +11,8 @@ assignees: amazingmarvin
 
 I do solemnly swear (or affirm) that this is an API bug, and not a Marvin bug. For Marvin bugs I would use the in-app "?→Contact Support" feature
 
+<!-- Feel free to delete any sections below that don't apply to your situation. -->
+
 **Describe the bug**
 A clear and concise description of what the bug is.
 
