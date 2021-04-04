@@ -1,3 +1,6 @@
+# 2021-04-04
+* Documented improved tomato timer webhooks. Now "timerDone" is dispatched after each work/break session finishes.
+
 # 2021-03-08
 * Documented Trackers
 
