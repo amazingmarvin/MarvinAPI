@@ -1,3 +1,6 @@
+# 2021-06-07
+* Improved Webhooks CORS documentation (this is a frequent source of confusion)
+
 # 2021-06-05
 * Documented Rewards
 * Documented BillingPeriod (in /api/me)
