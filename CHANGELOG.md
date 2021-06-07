@@ -1,3 +1,7 @@
+# 2021-06-05
+* Documented Rewards
+* Documented BillingPeriod (in /api/me)
+
 # 2021-04-04
 * Documented improved tomato timer webhooks. Now "timerDone" is dispatched after each work/break session finishes.
 
