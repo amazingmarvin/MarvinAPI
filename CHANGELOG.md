@@ -1,3 +1,8 @@
+# 2021-06-30
+* Documented new webhooks
+* Improved time block documentation
+* Documented user configuration (ProfileItems)
+
 # 2021-06-07
 * Improved Webhooks CORS documentation (this is a frequent source of confusion)
 
