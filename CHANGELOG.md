@@ -1,3 +1,6 @@
+# 2021-07-11
+* Documented /api/tracks
+
 # 2021-06-30
 * Documented new webhooks
 * Improved time block documentation
