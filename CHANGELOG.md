@@ -1,3 +1,6 @@
+# 2021-08-22
+* Documented /api/addEvent
+
 # 2021-07-11
 * Documented /api/tracks
 
