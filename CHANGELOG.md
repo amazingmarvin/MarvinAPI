@@ -1,3 +1,6 @@
+# 2021-11-15
+* Documented /api/todayItems date parameter
+
 # 2021-08-22
 * Documented /api/addEvent
 
