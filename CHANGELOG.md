@@ -1,3 +1,6 @@
+# 2021-11-16
+* Documented RecurringTasks, SavedItems, and Recurrence in general
+
 # 2021-11-15
 * Documented /api/todayItems date parameter
 
