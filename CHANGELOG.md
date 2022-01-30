@@ -1,3 +1,6 @@
+2022-01-29
+* Documented timeZoneFix
+
 # 2021-11-16
 * Documented RecurringTasks, SavedItems, and Recurrence in general
 
