@@ -4,7 +4,7 @@
 # 2022-02-23
 * Documented Reminders and Reminder APIs.
 
-2022-01-29
+# 2022-01-29
 * Documented timeZoneFix
 
 # 2021-11-16
