@@ -1,3 +1,9 @@
+# 2022-02-24
+* Added Tracking and TrackingSince to /api/me
+
+# 2022-02-23
+* Documented Reminders and Reminder APIs.
+
 2022-01-29
 * Documented timeZoneFix
 
