@@ -1,3 +1,6 @@
+# 2022-03-24
+* Documented /api/update
+
 # 2022-02-24
 * Added Tracking and TrackingSince to /api/me
 
