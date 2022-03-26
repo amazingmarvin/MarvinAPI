@@ -1,3 +1,6 @@
+# 2022-03-26
+* Documented bugfix/breaking change in /api/doc
+
 # 2022-03-24
 * Documented /api/update
 
