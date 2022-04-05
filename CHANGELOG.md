@@ -1,3 +1,8 @@
+# 2022-04-05
+* Document /api/doc/create
+* Document /api/doc/delete
+* Improve documentation for /api/doc/update
+
 # 2022-03-26
 * Documented bugfix/breaking change in /api/doc
 
