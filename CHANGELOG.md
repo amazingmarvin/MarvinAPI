@@ -1,3 +1,6 @@
+# 2022-08-08
+* ID of new item now sent when creating tasks, projects, and events
+
 # 2022-04-05
 * Document /api/doc/create
 * Document /api/doc/delete
