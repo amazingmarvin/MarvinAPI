@@ -1,3 +1,6 @@
+# 2022-09-11
+* Document adding date to /api/dueItems
+
 # 2022-08-08
 * ID of new item now sent when creating tasks, projects, and events
 
