@@ -1,3 +1,7 @@
+# 2022-12-05
+* Document /api/goals
+* Add ##Goal as shortcut when adding a task via API
+
 # 2022-09-11
 * Document adding date to /api/dueItems
 
