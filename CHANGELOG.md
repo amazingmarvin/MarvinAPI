@@ -1,3 +1,6 @@
+# 2023-01-19
+* Documented experimental /api/markDone
+
 # 2022-12-05
 * Document /api/goals
 * Add ##Goal as shortcut when adding a task via API
