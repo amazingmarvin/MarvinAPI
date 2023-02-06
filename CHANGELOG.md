@@ -1,3 +1,6 @@
+# 2023-02-06
+* Added X-Auto-Complete to /api/addTask
+
 # 2023-01-19
 * Documented experimental /api/markDone
 
