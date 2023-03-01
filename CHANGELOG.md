@@ -1,3 +1,7 @@
+# 2023-03-01
+* Documented /api/children
+* Documented /api/todayTimeBlocks
+
 # 2023-02-06
 * Added X-Auto-Complete to /api/addTask
 
