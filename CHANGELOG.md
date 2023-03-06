@@ -1,3 +1,6 @@
+# 2023-03-06
+* Improved Reminder documentation
+
 # 2023-03-01
 * Documented /api/children
 * Documented /api/todayTimeBlocks
