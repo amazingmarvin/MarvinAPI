@@ -1,3 +1,6 @@
+# 2023-03-09
+* Documented /api/updateHabit
+
 # 2023-03-06
 * Improved Reminder documentation
 
