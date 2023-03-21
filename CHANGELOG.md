@@ -1,3 +1,6 @@
+# 2023-03-21
+* Now only tasks and projects/categories are returned in /api/children (previously Time Blocks could sneak in)
+
 # 2023-03-13
 * Documented /api/habits
 
