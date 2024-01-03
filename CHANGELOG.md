@@ -1,3 +1,6 @@
+# 2024-01-03
+* Documented ?raw=1 for /api/habits endpoint
+
 # 2023-03-21
 * Now only tasks and projects/categories are returned in /api/children (previously Time Blocks could sneak in)
 
