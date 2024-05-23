@@ -1,3 +1,6 @@
+# 2024-05-23
+* Document change to /api/children
+
 # 2024-01-03
 * Documented ?raw=1 for /api/habits endpoint
 
