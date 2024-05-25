@@ -1,0 +1,1604 @@
+openapi: 3.0.0
+info:
+  title: Amazing Marvin API
+  version: 1.0.0
+  description: |
+    Use Marvin's API to access data that doesn't live in your user database, or for simplicity's sake.
+
+    ## Credentials
+    Include an HTTP header `X-API-Token` using the API_TOKEN if the endpoint requires limited access,
+    or the header `X-Full-Access-Token` using the FULL_ACCESS_TOKEN if the endpoint requires full access.
+
+    ## Rate Limits
+    - Do not create more than 1 item per second
+    - Do not burst more than 1 query each 3 seconds
+    - Do not exceed 1440 queries per day (1 per minute)
+
+    ## Stability
+    Marvin's API and data formats are subject to change. Each endpoint is marked with its stability level.
+  contact:
+    url: https://github.com/amazingmarvin/MarvinAPI
+  license:
+    name: API Documentation
+    url: https://github.com/amazingmarvin/MarvinAPI/wiki
+
+servers:
+  - url: https://serv.amazingmarvin.com/api
+    description: Production server
+
+security:
+  - ApiToken: []
+  - FullAccessToken: []
+
+paths:
+  /test:
+    post:
+      summary: Test credentials
+      description: Test whether your credentials are correct (stable)
+      security:
+        - ApiToken: []
+      responses:
+        "200":
+          description: Credentials are valid
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+
+  /addTask:
+    post:
+      summary: Create a task
+      description: |
+        Create a task with a POST request (stable, but new document's _id and _rev will be included in the response in the future).
+
+        Unless you add an X-Auto-Complete=false header, the title will be processed similar to autocompletion within Marvin.
+      security:
+        - ApiToken: []
+      parameters:
+        - name: X-Auto-Complete
+          in: header
+          required: false
+          schema:
+            type: boolean
+          description: Set to false to disable autocompletion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskRequest"
+      responses:
+        "200":
+          description: Task created successfully
+
+  /markDone:
+    post:
+      summary: Mark a task done
+      description: Mark a task done by POSTing its ID (experimental)
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - timeZoneOffset
+              properties:
+                itemId:
+                  type: string
+                  description: ID of the task to mark done
+                timeZoneOffset:
+                  type: number
+                  description: Timezone offset in minutes
+      responses:
+        "200":
+          description: Task marked done successfully
+
+  /addProject:
+    post:
+      summary: Create a project
+      description: Create a project with a POST request (stable)
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProjectRequest"
+      responses:
+        "200":
+          description: Project created successfully
+
+  /addEvent:
+    post:
+      summary: Create an event
+      description: Create an event with a POST request (experimental). Note that calendar sync happens on the client.
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - start
+                - length
+              properties:
+                title:
+                  type: string
+                  description: Event title
+                note:
+                  type: string
+                  description: Event note (markdown)
+                length:
+                  type: number
+                  description: Event length in milliseconds
+                start:
+                  type: string
+                  format: date-time
+                  description: ISO formatted start time
+      responses:
+        "200":
+          description: Event created successfully
+
+  /doc:
+    get:
+      summary: Read any doc
+      description: Get any individual document in the couchdb database by ID (stable)
+      security:
+        - FullAccessToken: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Document ID to retrieve
+      responses:
+        "200":
+          description: Document retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /doc/update:
+    post:
+      summary: Update any doc
+      description: Update any document (experimental). Be careful with this API!
+      security:
+        - FullAccessToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - setters
+              properties:
+                itemId:
+                  type: string
+                  description: Document ID to update
+                setters:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        type: string
+                      val:
+                        description: Value to set
+      responses:
+        "200":
+          description: Document updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /doc/create:
+    post:
+      summary: Create any doc
+      description: Create any document (experimental). Be careful with this API!
+      security:
+        - FullAccessToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - _id
+                - db
+              properties:
+                _id:
+                  type: string
+                db:
+                  type: string
+                  description: Database name (e.g., Tasks, Categories, etc.)
+                createdAt:
+                  type: number
+                  description: Date.now() when created
+      responses:
+        "200":
+          description: Document created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /doc/delete:
+    post:
+      summary: Delete any doc
+      description: Delete any document (experimental). Be careful - Marvin's Trash functionality is client-side only!
+      security:
+        - FullAccessToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+              properties:
+                itemId:
+                  type: string
+                  description: Document ID to delete
+      responses:
+        "200":
+          description: Document deleted successfully
+
+  /trackedItem:
+    get:
+      summary: Get the currently tracked task
+      description: Get the currently tracked task (stable, but will be extended to include how long tracked)
+      security:
+        - ApiToken: []
+      responses:
+        "200":
+          description: Currently tracked task
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  _id:
+                    type: string
+                  db:
+                    type: string
+                  title:
+                    type: string
+
+  /children:
+    get:
+      summary: Get child tasks/projects of a category/project
+      description: Get all items that have parentId equal to the ID you provide (experimental)
+      security:
+        - ApiToken: []
+      parameters:
+        - name: parentId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Parent ID (or "unassigned" for inbox items)
+        - name: X-Parent-Id
+          in: header
+          required: false
+          schema:
+            type: string
+          description: Can be used instead of query parameter
+      responses:
+        "200":
+          description: Array of child tasks and projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: "#/components/schemas/Task"
+                    - $ref: "#/components/schemas/Project"
+
+  /todayItems:
+    get:
+      summary: Get tasks and projects scheduled today
+      description: Get tasks and projects scheduled today, including rollover/auto-schedule due items if enabled (stable)
+      security:
+        - ApiToken: []
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Date in YYYY-MM-DD format
+        - name: X-Date
+          in: header
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Can be used instead of query parameter
+      responses:
+        "200":
+          description: Array of today's tasks and projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: "#/components/schemas/Task"
+                    - $ref: "#/components/schemas/Project"
+
+  /dueItems:
+    get:
+      summary: Get open tasks and projects due today or earlier
+      description: Get open Tasks and Projects that are due today or earlier (stable)
+      security:
+        - ApiToken: []
+      parameters:
+        - name: by
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Date in YYYY-MM-DD format (default is today)
+      responses:
+        "200":
+          description: Array of due tasks and projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  oneOf:
+                    - $ref: "#/components/schemas/Task"
+                    - $ref: "#/components/schemas/Project"
+
+  /todayTimeBlocks:
+    get:
+      summary: Get today's time blocks
+      description: Get a list of today's time blocks (experimental)
+      security:
+        - ApiToken: []
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Date in YYYY-MM-DD format
+        - name: X-Date
+          in: header
+          required: false
+          schema:
+            type: string
+            format: date
+          description: Can be used instead of query parameter
+      responses:
+        "200":
+          description: Array of time blocks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TimeBlock"
+
+  /categories:
+    get:
+      summary: Get all categories
+      description: Get a list of all categories (stable)
+      security:
+        - ApiToken: []
+      responses:
+        "200":
+          description: Array of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /labels:
+    get:
+      summary: Get all labels
+      description: Get a list of all labels in their sort order (stable)
+      security:
+        - ApiToken: []
+      responses:
+        "200":
+          description: Array of labels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Label"
+
+  /track:
+    post:
+      summary: Start/stop time tracking
+      description: Start or stop time tracking a task by its ID
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - taskId
+                - action
+              properties:
+                taskId:
+                  type: string
+                  description: Task ID to track
+                action:
+                  type: string
+                  enum: [START, STOP]
+                  description: Action to perform
+      responses:
+        "200":
+          description: Time tracking updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  startId:
+                    type: string
+                  startTimes:
+                    type: array
+                    items:
+                      type: number
+                  stopId:
+                    type: string
+                    nullable: true
+                  stopTimes:
+                    type: array
+                    items:
+                      type: number
+                  issues:
+                    type: array
+                    items:
+                      type: string
+
+  /time:
+    post:
+      summary: Start/stop time tracking (alias)
+      description: Alias for /track endpoint (use if "track" is in a browser extension blacklist)
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - taskId
+                - action
+              properties:
+                taskId:
+                  type: string
+                action:
+                  type: string
+                  enum: [START, STOP]
+      responses:
+        "200":
+          description: Time tracking updated
+
+  /tracks:
+    post:
+      summary: Get time track info
+      description: Get time track data for up to 100 tasks at once
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - taskIds
+              properties:
+                taskIds:
+                  type: array
+                  items:
+                    type: string
+                  maxItems: 100
+      responses:
+        "200":
+          description: Array of time track data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    taskId:
+                      type: string
+                    times:
+                      type: array
+                      items:
+                        type: number
+
+  /times:
+    post:
+      summary: Get time track info (alias)
+      description: Alias for /tracks endpoint
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - taskIds
+              properties:
+                taskIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Array of time track data
+
+  /claimRewardPoints:
+    post:
+      summary: Claim reward points
+      description: Claim reward points for completing a task or celebrating
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - points
+                - itemId
+                - date
+                - op
+              properties:
+                points:
+                  type: number
+                  description: Number of reward points
+                itemId:
+                  type: string
+                  description: Task ID or "MANUAL" for manual point reward
+                date:
+                  type: string
+                  format: date
+                  description: Date in YYYY-MM-DD format
+                op:
+                  type: string
+                  enum: [CLAIM]
+      responses:
+        "200":
+          description: User profile with updated points
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /unclaimRewardPoints:
+    post:
+      summary: Unclaim reward points
+      description: Unclaim reward points for user error or task marked incomplete
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - itemId
+                - date
+                - op
+              properties:
+                itemId:
+                  type: string
+                  description: Which itemId to undo
+                date:
+                  type: string
+                  format: date
+                op:
+                  type: string
+                  enum: [UNCLAIM]
+      responses:
+        "200":
+          description: User profile with updated points
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /spendRewardPoints:
+    post:
+      summary: Spend reward points
+      description: Spend reward points
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - points
+                - date
+                - op
+              properties:
+                points:
+                  type: number
+                date:
+                  type: string
+                  format: date
+                op:
+                  type: string
+                  enum: [SPEND]
+      responses:
+        "200":
+          description: User profile with updated points
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /resetRewardPoints:
+    post:
+      summary: Reset reward points
+      description: Permanently deletes earn/spend history and resets reward points to 0
+      security:
+        - FullAccessToken: []
+      responses:
+        "200":
+          description: User profile with reset points
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /kudos:
+    get:
+      summary: Get Marvin Kudos info
+      description: Get kudos, level, and remaining kudos information
+      security:
+        - ApiToken: []
+      responses:
+        "200":
+          description: Kudos information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  kudos:
+                    type: number
+                  level:
+                    type: number
+                  kudosRemaining:
+                    type: number
+
+  /me:
+    get:
+      summary: Get account information
+      description: Retrieve information about your account
+      security:
+        - ApiToken: []
+      responses:
+        "200":
+          description: Account information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+
+  /reminders:
+    get:
+      summary: Get all reminders
+      description: Get an array of all reminders that are currently scheduled
+      security:
+        - FullAccessToken: []
+      responses:
+        "200":
+          description: Array of reminders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reminder"
+
+  /reminder/set:
+    post:
+      summary: Set reminders
+      description: Set one or more reminders (currently only pushed to mobile phones)
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reminders
+              properties:
+                reminders:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Reminder"
+      responses:
+        "200":
+          description: Reminders set successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+
+  /reminder/delete:
+    post:
+      summary: Delete one or more reminders
+      description: Delete reminders by their IDs
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reminderIds
+              properties:
+                reminderIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Reminders deleted successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+
+  /reminder/deleteAll:
+    post:
+      summary: Delete all reminders
+      description: Delete all reminders
+      security:
+        - FullAccessToken: []
+      responses:
+        "200":
+          description: All reminders deleted successfully
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+
+  /goals:
+    get:
+      summary: Get goals
+      description: Get a list of all goals (stable)
+      security:
+        - ApiToken: []
+      responses:
+        "200":
+          description: Array of goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Goal"
+
+  /updateHabit:
+    post:
+      summary: Update habit
+      description: Record, undo record, or rewrite habit history (experimental)
+      security:
+        - ApiToken: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - habitId
+              properties:
+                habitId:
+                  type: string
+                time:
+                  type: number
+                  description: Timestamp for recording
+                value:
+                  type: number
+                  description: Value to record
+                undo:
+                  type: boolean
+                  description: Set to true to undo last recording
+                history:
+                  type: array
+                  items:
+                    type: number
+                  description: Array to rewrite habit history
+                updateDB:
+                  type: boolean
+                  description: Set to true to update the Habit in cloudant
+      responses:
+        "200":
+          description: New habit value
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+
+  /habit:
+    get:
+      summary: Get a habit
+      description: Retrieve a Habit including its full history (experimental)
+      security:
+        - ApiToken: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Habit ID
+      responses:
+        "200":
+          description: Habit with full history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Habit"
+
+  /habits:
+    get:
+      summary: List habits
+      description: Retrieve a list of all habits with full history (experimental)
+      security:
+        - ApiToken: []
+      parameters:
+        - name: raw
+          in: query
+          required: false
+          schema:
+            type: number
+            enum: [0, 1]
+          description: Set to 1 to return full habit objects (requires full access token)
+      responses:
+        "200":
+          description: Array of habits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Habit"
+
+components:
+  securitySchemes:
+    ApiToken:
+      type: apiKey
+      in: header
+      name: X-API-Token
+      description: API token for limited access (create tasks, read data)
+    FullAccessToken:
+      type: apiKey
+      in: header
+      name: X-Full-Access-Token
+      description: Full access token for all operations
+
+  schemas:
+    CreateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Task title (supports autocompletion like +today, #Parent, @label)
+        done:
+          type: boolean
+          default: false
+        day:
+          type: string
+          format: date
+          description: Schedule date in YYYY-MM-DD format
+        parentId:
+          type: string
+          description: ID of parent category/project
+        labelIds:
+          type: array
+          items:
+            type: string
+          description: Array of label IDs
+        firstScheduled:
+          type: string
+          format: date
+        rank:
+          type: number
+        dailySection:
+          type: string
+          enum: [Morning, Afternoon, Evening]
+        bonusSection:
+          type: string
+          enum: [Essential, Bonus]
+        customSection:
+          type: string
+          description: ID of custom section
+        timeBlockSection:
+          type: string
+          description: ID of time block
+        note:
+          type: string
+        dueDate:
+          type: string
+          format: date
+        timeEstimate:
+          type: number
+          description: Duration estimate in milliseconds
+        isReward:
+          type: boolean
+        isStarred:
+          type: number
+          description: Priority level (3=red, 2=orange, 1=yellow)
+        isFrogged:
+          type: number
+          description: Frog status (1=normal, 2=baby, 3=monster)
+        plannedWeek:
+          type: string
+          format: date
+          description: Monday of the week (YYYY-MM-DD)
+        plannedMonth:
+          type: string
+          description: Month in YYYY-MM format
+        rewardPoints:
+          type: number
+        rewardId:
+          type: string
+        backburner:
+          type: boolean
+        reviewDate:
+          type: string
+          format: date
+        itemSnoozeTime:
+          type: number
+          description: Date.now() until when snoozed
+        permaSnoozeTime:
+          type: string
+          description: Time in HH:mm format
+        timeZoneOffset:
+          type: number
+          description: Time offset in minutes
+
+    CreateProjectRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Project title
+        done:
+          type: boolean
+          default: false
+        day:
+          type: string
+          format: date
+          description: Schedule date or null
+        parentId:
+          type: string
+        labelIds:
+          type: array
+          items:
+            type: string
+        firstScheduled:
+          type: string
+          format: date
+        rank:
+          type: number
+        dailySection:
+          type: string
+        bonusSection:
+          type: string
+        customSection:
+          type: string
+        timeBlockSection:
+          type: string
+        note:
+          type: string
+        dueDate:
+          type: string
+          format: date
+        timeEstimate:
+          type: number
+        isReward:
+          type: boolean
+        priority:
+          type: string
+          enum: [low, mid, high]
+        isFrogged:
+          type: number
+        plannedWeek:
+          type: string
+          format: date
+        plannedMonth:
+          type: string
+        rewardPoints:
+          type: number
+        rewardId:
+          type: string
+        backburner:
+          type: boolean
+        reviewDate:
+          type: string
+          format: date
+        itemSnoozeTime:
+          type: number
+        permaSnoozeTime:
+          type: string
+        timeZoneOffset:
+          type: number
+
+    Task:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Unique task ID
+        _rev:
+          type: string
+        db:
+          type: string
+          default: Tasks
+        createdAt:
+          type: number
+        updatedAt:
+          type: number
+        workedOnAt:
+          type: number
+        title:
+          type: string
+        parentId:
+          type: string
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        startDate:
+          type: string
+          format: date
+          nullable: true
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        day:
+          type: string
+          description: YYYY-MM-DD or "unassigned"
+        firstScheduled:
+          type: string
+        plannedWeek:
+          type: string
+          format: date
+        plannedMonth:
+          type: string
+        sprintId:
+          type: string
+          nullable: true
+        rank:
+          type: number
+        masterRank:
+          type: number
+        done:
+          type: boolean
+        completedAt:
+          type: number
+          nullable: true
+        duration:
+          type: number
+        times:
+          type: array
+          items:
+            type: number
+        firstTracked:
+          type: number
+        doneAt:
+          type: number
+        isReward:
+          type: boolean
+        isStarred:
+          type: number
+        isFrogged:
+          type: number
+        isPinned:
+          type: boolean
+        pinId:
+          type: string
+        recurring:
+          type: boolean
+        recurringTaskId:
+          type: string
+        echo:
+          type: boolean
+        echoId:
+          type: string
+        link:
+          type: string
+        subtasks:
+          type: object
+          additionalProperties:
+            $ref: "#/components/schemas/Subtask"
+        labelIds:
+          type: array
+          items:
+            type: string
+        timeEstimate:
+          type: number
+        note:
+          type: string
+        email:
+          type: string
+        dailySection:
+          type: string
+        bonusSection:
+          type: string
+        customSection:
+          type: string
+        timeBlockSection:
+          type: string
+        dependsOn:
+          type: object
+          additionalProperties:
+            type: boolean
+        backburner:
+          type: boolean
+        reviewDate:
+          type: string
+          format: date
+        itemSnoozeTime:
+          type: number
+        permaSnoozeTime:
+          type: string
+        marvinPoints:
+          type: number
+        mpNotes:
+          type: array
+          items:
+            type: string
+        rewardPoints:
+          type: number
+        rewardId:
+          type: string
+
+    Subtask:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        done:
+          type: boolean
+        rank:
+          type: number
+        timeEstimate:
+          type: number
+
+    Project:
+      type: object
+      properties:
+        _id:
+          type: string
+        _rev:
+          type: string
+        db:
+          type: string
+          default: Categories
+        type:
+          type: string
+          enum: [project, category]
+        title:
+          type: string
+        updatedAt:
+          type: number
+        workedOnAt:
+          type: number
+        parentId:
+          type: string
+        rank:
+          type: number
+        dayRank:
+          type: number
+        day:
+          type: string
+          nullable: true
+        firstScheduled:
+          type: string
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        labelIds:
+          type: array
+          items:
+            type: string
+        timeEstimate:
+          type: number
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        plannedWeek:
+          type: string
+          format: date
+        plannedMonth:
+          type: string
+        sprintId:
+          type: string
+        done:
+          type: boolean
+        doneDate:
+          type: string
+          format: date
+        priority:
+          type: string
+          enum: [low, mid, high]
+        color:
+          type: string
+          description: Hex color like #222222
+        icon:
+          type: string
+        note:
+          type: string
+        recurring:
+          type: boolean
+        recurringTaskId:
+          type: string
+        echo:
+          type: boolean
+        isFrogged:
+          type: number
+        reviewDate:
+          type: string
+          format: date
+        marvinPoints:
+          type: number
+        mpNotes:
+          type: array
+          items:
+            type: string
+
+    Category:
+      allOf:
+        - $ref: "#/components/schemas/Project"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [category]
+
+    Label:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        groupId:
+          type: string
+        createdAt:
+          type: number
+        color:
+          type: string
+          description: Hex color like #f0a0a0
+        icon:
+          type: string
+        showAs:
+          type: string
+          enum: [text, icon, both]
+        isAction:
+          type: boolean
+        isHidden:
+          type: boolean
+
+    TimeBlock:
+      type: object
+      properties:
+        _id:
+          type: string
+        db:
+          type: string
+          default: PlannerItems
+        title:
+          type: string
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+          description: Start time in HH:mm format
+        duration:
+          type: number
+          description: Duration in minutes
+        isSection:
+          type: boolean
+        note:
+          type: string
+
+    Goal:
+      type: object
+      properties:
+        _id:
+          type: string
+        title:
+          type: string
+        note:
+          type: string
+        hideInDayView:
+          type: boolean
+        parentId:
+          type: string
+        isStarred:
+          type: number
+        labelIds:
+          type: array
+          items:
+            type: string
+        importance:
+          type: number
+          minimum: 1
+          maximum: 5
+        difficulty:
+          type: number
+          minimum: 1
+          maximum: 5
+        motivations:
+          type: array
+          items:
+            type: string
+        committed:
+          type: boolean
+        expectedTasks:
+          type: number
+        expectedDuration:
+          type: number
+        expectedHabits:
+          type: string
+        checkIn:
+          type: boolean
+        checkIns:
+          type: array
+          items:
+            type: number
+        lastCheckIn:
+          type: string
+          format: date
+        checkInWeeks:
+          type: number
+        checkInStart:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [backburner, pending, active, done]
+        startedAt:
+          type: number
+        color:
+          type: string
+        dueDate:
+          type: string
+          format: date
+          nullable: true
+        hasEnd:
+          type: boolean
+        sections:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: string
+              title:
+                type: string
+              note:
+                type: string
+        taskProgress:
+          type: boolean
+
+    Habit:
+      type: object
+      properties:
+        _id:
+          type: string
+        db:
+          type: string
+          default: Habits
+        title:
+          type: string
+        note:
+          type: string
+        color:
+          type: string
+        parentId:
+          type: string
+        labelIds:
+          type: array
+          items:
+            type: string
+        isStarred:
+          type: number
+        isFrogged:
+          type: number
+        timeEstimate:
+          type: number
+        startDate:
+          type: string
+          format: date
+          nullable: true
+        endDate:
+          type: string
+          format: date
+          nullable: true
+        units:
+          type: string
+        period:
+          type: string
+          enum: [day, week, month, quarter, year]
+        target:
+          type: number
+        isPositive:
+          type: boolean
+        recordType:
+          type: string
+          enum: [boolean, number]
+        showInDayView:
+          type: boolean
+        showInCalendar:
+          type: boolean
+        askOn:
+          type: array
+          items:
+            type: number
+        startTime:
+          type: string
+        endTime:
+          type: string
+        time:
+          type: string
+        showAfterSuccess:
+          type: boolean
+        showAfterRecord:
+          type: boolean
+        done:
+          type: boolean
+        history:
+          type: array
+          items:
+            type: number
+          description: Array of [time1, val1, time2, val2, ...]
+        dismissed:
+          type: string
+          format: date
+
+    Reminder:
+      type: object
+      properties:
+        time:
+          type: number
+          description: Unix timestamp in seconds
+        offset:
+          type: number
+          description: Minutes ahead of time to remind (-1 = use default)
+        reminderId:
+          type: string
+          description: Unique ID (either taskId or randId)
+        type:
+          type: string
+          enum: [T, M, DT, DP, t]
+          description: T=task, M=manual, DT=due task, DP=due project, t=test
+        title:
+          type: string
+          maxLength: 200
+        snooze:
+          type: number
+          description: Snooze duration in minutes
+        autoSnooze:
+          type: boolean
+        canTrack:
+          type: boolean
+
+    Profile:
+      type: object
+      properties:
+        userId:
+          type: string
+        email:
+          type: string
+        parentEmail:
+          type: string
+        emailConfirmed:
+          type: boolean
+        billingPeriod:
+          type: string
+          enum: [TRIAL, MONTH, YEAR, ONCE, PAID]
+        paidThrough:
+          type: string
+          format: date-time
+        iosSub:
+          type: boolean
+        marvinPoints:
+          type: number
+        nextMultiplier:
+          type: number
+        rewardPointsEarned:
+          type: number
+        rewardPointsSpent:
+          type: number
+        rewardPointsEarnedToday:
+          type: number
+        rewardPointsSpentToday:
+          type: number
+        rewardPointsLastDate:
+          type: string
+          format: date
+        tomatoes:
+          type: number
+        tomatoesToday:
+          type: number
+        tomatoTime:
+          type: number
+        tomatoTimeToday:
+          type: number
+        tomatoDate:
+          type: string
+          format: date
+        defaultSnooze:
+          type: number
+        defaultAutoSnooze:
+          type: boolean
+        defaultOffset:
+          type: number
+        tracking:
+          type: string
+        trackingSince:
+          type: number
+        currentVersion:
+          type: string
+        signupAppVersion:
+          type: string
