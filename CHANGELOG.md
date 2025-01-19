@@ -1,4 +1,7 @@
 # 2024-05-23
+* Fixed review date in Tasks created through API
+
+# 2024-05-23
 * Document change to /api/children
 
 # 2024-01-03
